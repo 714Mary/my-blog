@@ -1,0 +1,13 @@
+server:
+  port: 8081
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/blog?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: ""  # WampServer 默认密码是空的，这里直接写""就行
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.example.blogbackend.entity
+  configuration:
+    map-underscore-to-camel-case: true

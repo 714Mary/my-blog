@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.blogbackend.mapper.ArticleMapper">
+    <select id="list" resultType="Article">
+        select id, title, content, create_time from article order by create_time desc
+    </select>
+
+    <select id="getById" resultType="Article">
+        select id, title, content, create_time from article where id=#{id}
+    </select>
+
+    <insert id="insert" parameterType="Article">
+        insert into article(title, content) values(#{title}, #{content})
+    </insert>
+</mapper>
