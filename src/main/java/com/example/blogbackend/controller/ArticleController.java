@@ -1,42 +1,52 @@
 package com.example.blogbackend.controller;
 
+import com.example.blogbackend.common.Result;
 import com.example.blogbackend.entity.Article;
 import com.example.blogbackend.service.impl.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import java.util.HashMap;
+
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/article")
 @CrossOrigin
 public class ArticleController {
+
     @Autowired
     private ArticleService articleService;
 
+    // 查询列表
     @GetMapping("/list")
-    public Map<String, Object> list() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("data", articleService.list());
-        return result;
+    public Result<List<Article>> list() {
+        return Result.success(articleService.list());
     }
 
+    // 根据ID查询
     @GetMapping("/get/{id}")
-    public Map<String, Object> getById(@PathVariable Integer id) {
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("data", articleService.getById(id));
-        return result;
+    public Result<Article> getById(@PathVariable Integer id) {
+        return Result.success(articleService.getById(id));
     }
 
+    // 新增
     @PostMapping("/add")
-    public Map<String, Object> add(@RequestBody Article article) {
+    public Result<?> add(@RequestBody Article article) {
         articleService.add(article);
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("msg", "添加成功");
-        return result;
+        return Result.success();
+    }
+
+    // ==================== 下面是新增的 ====================
+    // 修改
+    @PutMapping("/update")
+    public Result<?> update(@RequestBody Article article) {
+        articleService.update(article);
+        return Result.success();
+    }
+
+    // 删除
+    @DeleteMapping("/delete/{id}")
+    public Result<?> delete(@PathVariable Integer id) {
+        articleService.deleteById(id);
+        return Result.success();
     }
 }

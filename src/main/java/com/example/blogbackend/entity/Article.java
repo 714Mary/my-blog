@@ -8,5 +8,5 @@ public class Article {
     private Integer id;
     private String title;
     private String content;
-    private LocalDateTime createTime;
+    private LocalDateTime createTime;//对应数据库create_time,因为开启了驼峰自动映射
 }

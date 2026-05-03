@@ -1,100 +1,97 @@
 <template>
-  <div class="container">
-    <h1>我的博客</h1>
+  <div style="width: 800px; margin: 50px auto;">
+    <h2 style="text-align: center;">博客文章管理</h2>
 
-    <!-- 发文章表单 -->
-    <div class="form-box">
-      <input v-model="newArticle.title" placeholder="文章标题" />
-      <textarea v-model="newArticle.content" placeholder="文章内容"></textarea>
-      <button @click="addArticle">发布文章</button>
-    </div>
+    <!-- 新增按钮 -->
+    <el-button type="primary" @click="add">新增文章</el-button>
 
     <!-- 文章列表 -->
-    <div class="article-list">
-      <div v-for="article in articleList" :key="article.id" class="article-item">
-        <h3>{{ article.title }}</h3>
-        <p>{{ article.content }}</p>
-        <small>发布时间：{{ article.createTime }}</small>
-      </div>
-    </div>
+    <el-table :data="list" border style="width: 100%; margin-top: 20px;">
+      <el-table-column prop="id" label="ID" />
+      <el-table-column prop="title" label="标题" />
+      <el-table-column prop="content" label="内容" />
+      <el-table-column label="操作">
+        <template #default="scope">
+          <!-- 修改按钮 -->
+          <el-button type="success" size="mini" @click="handleEdit(scope.row)">修改</el-button>
+          <!-- 删除按钮 -->
+          <el-button type="danger" size="mini" @click="handleDelete(scope.row.id)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <!-- 新增/修改 弹窗 -->
+    <el-dialog v-model="dialogVisible" title="文章信息">
+      <el-form label-width="80px">
+        <el-form-item label="标题">
+          <el-input v-model="form.title" />
+        </el-form-item>
+        <el-form-item label="内容">
+          <el-input v-model="form.content" type="textarea" :rows="3" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="save">确认保存</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
-// 配置后端地址
-axios.defaults.baseURL = 'http://localhost:8081'
+const list = ref([])
+const dialogVisible = ref(false)
+const form = ref({ id: '', title: '', content: '' })
 
-// 文章列表和新增表单
-const articleList = ref([])
-const newArticle = ref({
-  title: '',
-  content: ''
-})
-
-// 加载文章列表
-const loadArticles = async () => {
-  const res = await axios.get('/article/list')
-  articleList.value = res.data.data
-}
-
-// 新增文章
-const addArticle = async () => {
-  if (!newArticle.value.title || !newArticle.value.content) {
-    alert('标题和内容不能为空！')
-    return
-  }
-  await axios.post('/article/add', newArticle.value)
-  alert('发布成功！')
-  // 清空表单并刷新列表
-  newArticle.value = { title: '', content: '' }
-  loadArticles()
-}
-
-// 页面加载时自动获取文章列表
+// 页面加载时查询所有文章
 onMounted(() => {
-  loadArticles()
+  axios.get('http://localhost:8081/article/list').then(res => {
+    list.value = res.data.data
+  })
 })
+
+// 打开新增弹窗
+const add = () => {
+  form.value = { id: '', title: '', content: '' }
+  dialogVisible.value = true
+}
+
+// 打开修改弹窗
+const handleEdit = (row) => {
+  form.value = { ...row }
+  dialogVisible.value = true
+}
+
+// 保存（新增 + 修改 二合一）
+const save = () => {
+  if (form.value.id) {
+    // 修改
+    axios.put('http://localhost:8081/article/update', form.value).then(() => {
+      ElMessage.success('修改成功')
+      dialogVisible.value = false
+      onMounted()
+    })
+  } else {
+    // 新增
+    axios.post('http://localhost:8081/article/add', form.value).then(() => {
+      ElMessage.success('新增成功')
+      dialogVisible.value = false
+      onMounted()
+    })
+  }
+}
+
+// 删除
+const handleDelete = (id) => {
+  ElMessageBox.confirm('确定要删除吗？', '提示', { type: 'warning' }).then(() => {
+    axios.delete('http://localhost:8081/article/delete/' + id).then(() => {
+      ElMessage.success('删除成功')
+      onMounted()
+    })
+  })
+}
 </script>
-
-<style scoped>
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.form-box {
-  background: #f5f5f5;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-input, textarea {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-button {
-  padding: 10px;
-  background: #42b983;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.article-item {
-  border: 1px solid #eee;
-  padding: 15px;
-  margin-bottom: 15px;
-  border-radius: 8px;
-}
-</style>
