@@ -10,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/article")
-@CrossOrigin
 public class ArticleController {
 
     @Autowired
@@ -49,4 +48,5 @@ public class ArticleController {
         articleService.deleteById(id);
         return Result.success();
     }
+
 }
